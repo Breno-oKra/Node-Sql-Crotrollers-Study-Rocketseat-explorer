@@ -52,13 +52,23 @@ class NotesController {
     return response.json()
   }
   async index(request,response){
-    const {user_id,title } = request.query
-    const notes = await knex("notes")
-    .where({ user_id })
-    // quando usamos %title% dizemos ao banco que tanto antes e depois
-    // em qualquer parte da palavra que conter title pode retornar
-    .whereLike("title",`%${title}%`)
-    .orderBy("title")
+    const {user_id,title,tags } = request.query
+    let  notes;
+    if(tags){
+      // .trim retira os espaços ex: t = '   Hello world!   '
+      // console.log(t.trim()) output: "Hello world!"
+      const filterTags = tags.split(",").map(tag => tag.trim())
+      notes = await knex("tags")
+      // primeiro pegamos o campo de comparação e depois o vetor 
+      .whereIn("name",filterTags)
+    }else{
+      notes = await knex("notes")
+      .where({ user_id })
+      // quando usamos %title% dizemos ao banco que tanto antes e depois
+      // em qualquer parte da palavra que conter title pode retornar
+      .whereLike("title",`%${title}%`)
+      .orderBy("title")
+    }
 
     return response.json(notes)
   }
