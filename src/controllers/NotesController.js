@@ -59,8 +59,18 @@ class NotesController {
       // console.log(t.trim()) output: "Hello world!"
       const filterTags = tags.split(",").map(tag => tag.trim())
       notes = await knex("tags")
+      .select([
+        "notes.id",
+        "notes.title",
+        "notes.user_id"
+      ])
+      .where("notes.user_id", user_id)
+      .whereLike("notes.title",`%${title}%`)
+
       // primeiro pegamos o campo de comparação e depois o vetor 
       .whereIn("name",filterTags)
+      .innerJoin("notes","notes.id","tags.note_id")
+      .orderBy("notes.title")
     }else{
       notes = await knex("notes")
       .where({ user_id })
