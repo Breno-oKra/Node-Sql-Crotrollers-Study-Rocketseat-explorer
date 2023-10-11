@@ -52,8 +52,12 @@ class NotesController {
     return response.json()
   }
   async index(request,response){
-    const {user_id } = request.query
-    const notes = await knex("notes").where({ user_id })
+    const {user_id,title } = request.query
+    const notes = await knex("notes")
+    .where({ user_id })
+    // quando usamos %title% dizemos ao banco que tanto antes e depois
+    // em qualquer parte da palavra que conter title pode retornar
+    .whereLike("title",`%${title}%`)
     .orderBy("title")
 
     return response.json(notes)
