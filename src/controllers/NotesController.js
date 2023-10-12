@@ -66,7 +66,6 @@ class NotesController {
       ])
       .where("notes.user_id", user_id)
       .whereLike("notes.title",`%${title}%`)
-
       // primeiro pegamos o campo de comparação e depois o vetor 
       .whereIn("name",filterTags)
       .innerJoin("notes","notes.id","tags.note_id")
@@ -80,7 +79,17 @@ class NotesController {
       .orderBy("title")
     }
 
-    return response.json(notes)
+    const useTags = await knex("tags").where({ user_id})
+    const notesWithTags = notes.maps( note => {
+      const noteTags = userTags.filter(tag => tag.note_id === note.id)
+      return {
+        ...note,
+        tags: noteTags
+
+      }
+    })
+
+    return response.json(notesWithTags)
   }
 }
 
